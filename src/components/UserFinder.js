@@ -3,28 +3,37 @@ import { Fragment } from "react";
 import Users from "./Users";
 import classes from "./UserFinder.module.css";
 import React, { Component } from "react";
-
-const DUMMY_USERS = [
-  { id: "u1", name: "Max" },
-  { id: "u2", name: "Manuel" },
-  { id: "u3", name: "Julie" },
-];
+import UsersContext from "../store/users-context";
 
 export default class UserFinder extends Component {
+  //  get context here, this line will register context to this component
+  //  we can grab data with "this.context" after
+
+  static contextType = UsersContext;
+
   constructor(props) {
     super();
     this.state = {
-      filteredUsers: DUMMY_USERS,
+      filteredUsers: [],
       searchTerm: "",
     };
   }
+
+  // Only once when the component is initially mounted
+  // equal to useEffect(()=>{},[]) , will run only once
+  componentDidMount() {
+    // sent http request
+    this.setState({ filteredUsers: this.context.users }); // not "contextType"
+  }
+
   // without the props, this lifecycle function will be an infinite loop
   // https://stackoverflow.com/questions/46686386/componentdidupdate-vs-componentdidmount
   componentDidUpdate(prevProps, prevState) {
     if (prevState.searchTerm !== this.state.searchTerm) {
       this.setState({
-        filteredUsers: DUMMY_USERS.filter((user) =>
-          user.name.includes(this.state.searchTerm)
+        filteredUsers: this.context.users.filter(
+          // not "contextType"
+          (user) => user.name.includes(this.state.searchTerm)
         ),
       });
     }
@@ -37,11 +46,13 @@ export default class UserFinder extends Component {
   render() {
     return (
       <Fragment>
+        {/* <UsersContext.Consumer> */}
         <div className={classes.finder}>
           <input type="search" onChange={this.searchChangeHandler} />
           {/* <input type='search' onChange={this.searchChangeHandler.bind(this)} /> */}
         </div>
         <Users users={this.state.filteredUsers} />
+        {/* </UsersContext.Consumer> */}
       </Fragment>
     );
   }
