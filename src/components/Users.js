@@ -1,20 +1,38 @@
+import { Component } from "react";
+
 import User from "./User";
 import classes from "./Users.module.css";
-import React, { Component } from "react";
 
-export default class Users extends Component {
+class Users extends Component {
   constructor() {
     super();
     this.state = {
       showUsers: true,
-    }; //  always be an object
+      more: "Test",
+    };
   }
 
-  toggleUsersHandler = () => {
+  componentDidUpdate() {
+    // try {
+    //   someCodeWhichMightFail()
+    // } catch (err) {
+    //   // handle error
+    // }
+    if (this.props.users.length === 0) {
+      // will throw the Error to the Parent component
+      // But in the Parent, this component is just a JSX code
+      // Parent component cannot use Try-Catch to handle the error
+      // If Parent cannot handle the Error, the program will crush
+      throw new Error("No users provided!");
+    }
+  }
+
+  toggleUsersHandler() {
+    // this.state.showUsers = false; // NOT!
     this.setState((curState) => {
       return { showUsers: !curState.showUsers };
     });
-  };
+  }
 
   render() {
     const usersList = (
@@ -27,7 +45,7 @@ export default class Users extends Component {
 
     return (
       <div className={classes.users}>
-        <button onClick={this.toggleUsersHandler}>
+        <button onClick={this.toggleUsersHandler.bind(this)}>
           {this.state.showUsers ? "Hide" : "Show"} Users
         </button>
         {this.state.showUsers && usersList}
@@ -35,3 +53,30 @@ export default class Users extends Component {
     );
   }
 }
+
+// const Users = () => {
+//   const [showUsers, setShowUsers] = useState(true);
+
+//   const toggleUsersHandler = () => {
+//     setShowUsers((curState) => !curState);
+//   };
+
+//   const usersList = (
+//     <ul>
+//       {DUMMY_USERS.map((user) => (
+//         <User key={user.id} name={user.name} />
+//       ))}
+//     </ul>
+//   );
+
+//   return (
+//     <div className={classes.users}>
+//       <button onClick={toggleUsersHandler}>
+//         {showUsers ? 'Hide' : 'Show'} Users
+//       </button>
+//       {showUsers && usersList}
+//     </div>
+//   );
+// };
+
+export default Users;

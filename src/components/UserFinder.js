@@ -1,17 +1,14 @@
-import { Fragment } from "react";
+import { Fragment, Component } from "react";
 
 import Users from "./Users";
 import classes from "./UserFinder.module.css";
-import React, { Component } from "react";
 import UsersContext from "../store/users-context";
+import ErrorBoundary from "./ErrorBoundary";
 
-export default class UserFinder extends Component {
-  //  get context here, this line will register context to this component
-  //  we can grab data with "this.context" after
-
+class UserFinder extends Component {
   static contextType = UsersContext;
 
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
       filteredUsers: [],
@@ -19,41 +16,61 @@ export default class UserFinder extends Component {
     };
   }
 
-  // Only once when the component is initially mounted
-  // equal to useEffect(()=>{},[]) , will run only once
   componentDidMount() {
-    // sent http request
-    this.setState({ filteredUsers: this.context.users }); // not "contextType"
+    // Send http request...
+    this.setState({ filteredUsers: this.context.users });
   }
 
-  // without the props, this lifecycle function will be an infinite loop
-  // https://stackoverflow.com/questions/46686386/componentdidupdate-vs-componentdidmount
   componentDidUpdate(prevProps, prevState) {
     if (prevState.searchTerm !== this.state.searchTerm) {
       this.setState({
-        filteredUsers: this.context.users.filter(
-          // not "contextType"
-          (user) => user.name.includes(this.state.searchTerm)
+        filteredUsers: this.context.users.filter((user) =>
+          user.name.includes(this.state.searchTerm)
         ),
       });
     }
   }
 
-  searchChangeHandler = (event) => {
+  searchChangeHandler(event) {
     this.setState({ searchTerm: event.target.value });
-  };
+  }
 
   render() {
     return (
       <Fragment>
-        {/* <UsersContext.Consumer> */}
         <div className={classes.finder}>
-          <input type="search" onChange={this.searchChangeHandler} />
-          {/* <input type='search' onChange={this.searchChangeHandler.bind(this)} /> */}
+          <input type="search" onChange={this.searchChangeHandler.bind(this)} />
         </div>
-        <Users users={this.state.filteredUsers} />
-        {/* </UsersContext.Consumer> */}
+        <ErrorBoundary>
+          <Users users={this.state.filteredUsers} />
+        </ErrorBoundary>
       </Fragment>
     );
   }
 }
+
+// const UserFinder = () => {
+//   const [filteredUsers, setFilteredUsers] = useState(DUMMY_USERS);
+//   const [searchTerm, setSearchTerm] = useState('');
+
+//   useEffect(() => {
+//     setFilteredUsers(
+//       DUMMY_USERS.filter((user) => user.name.includes(searchTerm))
+//     );
+//   }, [searchTerm]);
+
+//   const searchChangeHandler = (event) => {
+//     setSearchTerm(event.target.value);
+//   };
+
+//   return (
+//     <Fragment>
+//       <div className={classes.finder}>
+//         <input type='search' onChange={searchChangeHandler} />
+//       </div>
+//       <Users users={filteredUsers} />
+//     </Fragment>
+//   );
+// };
+
+export default UserFinder;
